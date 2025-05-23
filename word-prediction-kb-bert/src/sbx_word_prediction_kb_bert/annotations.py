@@ -35,7 +35,7 @@ def load_predictor(num_decimals_str: str) -> TopKPredictor:
 def predict_words__kb_bert(
     out_prediction: Output = Output(
         f"<token>:{PROJECT_NAME}.word-prediction--kb-bert",
-        description="Word predictions from masked BERT (format: '|<word>:<score>|...|)",
+        description="Word predictions from masked BERT, formated as Python dictionaries",
     ),
     word: Annotation = Annotation("<token:word>"),
     sentence: Annotation = Annotation("<sentence>"),
@@ -94,5 +94,6 @@ def run_word_prediction(
 
             predictions_scores = predictor.get_top_k_predictions(
                 sent_to_tag, k=num_predictions
-            )
-            out_prediction_annotations[token_index_to_mask] = predictions_scores
+            ).strip('|').split('|')
+            predictions = {p.split(':')[0] : p.split(':')[1] for p in predictions_scores if p != '' }
+            out_prediction_annotations[token_index_to_mask] = predictions
